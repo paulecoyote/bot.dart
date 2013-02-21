@@ -47,7 +47,7 @@ void main() {
 
   addTask('update-html', html_tasks.getUpdateExampleHtmlTask());
 
-  addTask('x_git_docs', unified_docs.gitGitDocExperimentTask());
+  addTask('x-git-docs', unified_docs.gitGitDocExperimentTask());
 
   runHop();
 }
