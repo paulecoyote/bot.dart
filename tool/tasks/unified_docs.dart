@@ -191,20 +191,23 @@ Future<Map<String, String>> _getTreeShas(GitDir gd) {
       });
 }
 
-// Stolen without shame from Dart - at rev 18629
+// Stolen without shame from Dart - at rev 19799
 // dart/utils/pub/version.dart
+
+/// Regex that matches a version number at the beginning of a string.
+final _START_VERSION = new RegExp(
+    r'^'                                        // Start at beginning.
+    r'(\d+).(\d+).(\d+)'                        // Version number.
+    r'(-([0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*))?'    // Pre-release.
+    r'(\+([0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*))?'); // Build.
+
+/// Like [_START_VERSION] but matches the entire string.
+final _COMPLETE_VERSION = new RegExp("${_START_VERSION.pattern}\$");
+
 /// A parsed semantic version number.
-class Version implements Comparable {
+class Version implements Comparable<Version> {
   /// No released version: i.e. "0.0.0".
   static Version get none => new Version(0, 0, 0);
-
-  static final _PARSE_REGEX = new RegExp(
-      r'^'                                       // Start at beginning.
-      r'(\d+).(\d+).(\d+)'                       // Version number.
-      r'(-([0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*))?'   // Pre-release.
-      r'(\+([0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*))?'  // Build.
-      r'$');                                     // Consume entire string.
-
   /// The major version number: "1" in "1.2.3".
   final int major;
 
@@ -233,7 +236,7 @@ class Version implements Comparable {
 
   /// Creates a new [Version] by parsing [text].
   factory Version.parse(String text) {
-    final match = _PARSE_REGEX.firstMatch(text);
+    final match = _COMPLETE_VERSION.firstMatch(text);
     if (match == null) {
       throw new FormatException('Could not parse "$text".');
     }
