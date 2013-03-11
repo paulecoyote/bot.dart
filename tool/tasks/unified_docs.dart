@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 import 'package:meta/meta.dart';
+import 'package:html5lib/dom.dart';
 import 'package:bot/bot.dart';
 import 'package:bot/bot_git.dart';
 import 'package:bot/bot_io.dart';
@@ -37,7 +38,7 @@ Task gitGitDocExperimentTask() {
         .then((Map<String, String> values) {
           docTreeShas = values;
 
-          return _hashBlob(getRootPage(docTreeShas.keys), write: true);
+          return _hashBlob(_getRootPage(docTreeShas), write: true);
         })
         .then((String indexFileSha) {
           print(indexFileSha);
@@ -75,22 +76,48 @@ Task gitGitDocExperimentTask() {
   });
 }
 
-String getRootPage(Iterable<String> names) {
-  final nameList = names.toList()..sort();
+String _getRootPage(Map<String, String> items) {
+  final nameList = items.keys.toList()
+      ..sort();
 
-  final buffer = new StringBuffer();
+  final doc = new Document.html(_bodyContent);
 
-  buffer.write('<html>\n<head><title>page</title><head>\n');
-  buffer.write('<body><ul>\n');
+  final table = doc.query('table');
 
   for(final name in nameList) {
-    buffer.write("  <li><a href='$name'>$name</a></li>\n");
+    final row = new Element.tag('tr');
+
+    var td = new Element.tag('td');
+
+    var link = new Element.tag('a')
+      ..innerHtml = name
+      ..attributes['href'] = name;
+
+    td.children.add(link);
+
+    row.children.add(td);
+
+    table.children.add(row);
+    table.insertBefore(new Text('\n'), null);
   }
 
-
-  buffer.write('</ul></body></html>\n');
-  return buffer.toString();
+  return doc.outerHtml;
 }
+
+const _bodyContent =
+'''
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>BOT Documentation</title>
+  </head>
+  <body>
+    <table>
+    </table>
+  </body>
+</html>
+''';
 
 Future<String> _hashBlob(String contents, {bool write: false} ) {
   final args = ['git', 'hash-object', '-t', 'blob'];
@@ -99,7 +126,11 @@ Future<String> _hashBlob(String contents, {bool write: false} ) {
     args.add('-w');
   }
 
-  args.addAll(['--stdin', '<<<', '"$contents"']);
+  // using single quotes to write to standard output
+  // make sure all instances of single quote are escaped
+  contents = contents.replaceAll("'", r"'\''");
+
+  args.addAll(['--stdin', '<<<', "'$contents'"]);
   final bashArgs = ['-c', args.join(' ')];
   return Process.run('bash', bashArgs)
       .then((ProcessResult pr) {
