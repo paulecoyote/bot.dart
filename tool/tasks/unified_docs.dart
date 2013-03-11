@@ -15,6 +15,7 @@ const _ghPagesBranch = 'x-gh-pages';
 const _docsTagPrefix = 'docs-v';
 const _latestCommit = 'latest-commit';
 const _latestRelease = 'latest-pub';
+const _botCommitRoot = r'https://github.com/kevmoo/bot.dart/commit/';
 
 Task gitGitDocExperimentTask() {
 
