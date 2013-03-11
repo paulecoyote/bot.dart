@@ -82,7 +82,7 @@ String _getRootPage(Map<String, String> items) {
 
   final doc = new Document.html(_bodyContent);
 
-  final table = doc.query('table');
+  final table = doc.query('tbody');
 
   for(final name in nameList) {
     final row = new Element.tag('tr');
@@ -113,8 +113,8 @@ const _bodyContent =
     <title>BOT Documentation</title>
   </head>
   <body>
-    <table>
-    </table>
+    <table><tbody>
+    </tbody></table>
   </body>
 </html>
 ''';
